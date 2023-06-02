@@ -1,0 +1,23 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Django Exchange</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+</head>
+<body>
+    <header>
+        <p>Welcome to Exchange!</p>
+    </header>
+
+    {% block content %}
+    {% endblock content %}
+
+    <footer>
+        <p>&copy; Made by Self</p>
+    </footer>
+</body>
+<script src="https://code.jscharting.com/2.9.0/jscharting.js"></script>
+<script src="{% static 'index.js' %}"></script>
+</html>

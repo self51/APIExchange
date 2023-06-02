@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="centered">Current exchange trading rules and symbol information</h1>
+
+<table>
+    <tr>
+        <th>Symbol</th>
+        <th>Quote Asset</th>
+        <th>Max Quote Amount</th>
+        <th>Maker Commission</th>
+    </tr>
+    {% for data in exchange_info.symbols %}
+        <tr>
+            <th>{{ data.symbol }}</th>
+            <th>{{ data.quoteAsset }}</th>
+            <th>{{ data.maxQuoteAmount }}</th>
+            <th>{{ data.makerCommission }}</th>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

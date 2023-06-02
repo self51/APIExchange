@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="centered">24hr Ticker Price Change Statistics</h1>
+
+<table>
+    <tr>
+        <th>Symbol</th>
+        <th>Price</th>
+        <th>Change</th>
+        <th>24h High</th>
+        <th>24h Low</th>
+        <th>24h Vol</th>
+    </tr>
+    {% for data in ticker %}
+        <tr>
+            <th><a href="{% url 'main:order' data.symbol data.lastPrice %}">{{ data.symbol }}</a></th>
+            <th>{{ data.lastPrice }}</th>
+            <th>{{ data.priceChangePercent }}%</th>
+            <th>{{ data.highPrice }}</th>
+            <th>{{ data.lowPrice }}</th>
+            <th>{{ data.volume }}</th>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

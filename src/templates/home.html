@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<a class="centered" href="{% url 'main:exchange_info' %}">Exchange info</a>
+<a class="centered" href="{% url 'main:market' %}">Market</a>
+<a class="centered" href="{% url 'main:kline' %}">Klines</a>
+<a class="centered" href="{% url 'main:account' %}">Account</a>
+
+{% endblock content %}
