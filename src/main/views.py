@@ -1,46 +1,45 @@
-import time
-import requests
-import hashlib
-import hmac
-import base64
-
-import environ
-from pathlib import Path
-
 from django.shortcuts import render
 from django.views.generic import (View)
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env()
-environ.Env.read_env()
+from .services import APIRequestManager
 
 
 class ExchangeInfo(View):
     def get(self, *args):
-        url = "https://api.mexc.com/api/v3/exchangeInfo"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return render(self.request, 'main/exchange_info.html', {'exchange_info': response.json()})
+        url = "https://api.mexc.com/api/v3/exchangeInfo?"
+        request_builder = APIRequestManager(url, {})
+        status_code, data = request_builder.make_request()
+
+        if status_code == 200:
+            return render(self.request, 'main/exchange_info.html', {'exchange_info': data})
 
         return render(self.request, 'main/not_available.html')
 
 
 class Market(View):
     def get(self, *args):
-        url = "https://api.mexc.com/api/v3/ticker/24hr"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return render(self.request, 'main/market.html', {'ticker': response.json()})
+        url = "https://api.mexc.com/api/v3/ticker/24hr?"
+        request_builder = APIRequestManager(url, {})
+        status_code, data = request_builder.make_request()
+
+        if status_code == 200:
+            return render(self.request, 'main/market.html', {'ticker': data})
 
         return render(self.request, 'main/not_available.html')
 
 
 class Klines(View):
     def get(self, *args):
-        url = "https://api.mexc.com/api/v3/klines?symbol=TOMO3LUSDT&interval=1d"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return render(self.request, 'main/kline.html', {'klines': response.json()})
+        url = "https://api.mexc.com/api/v3/klines?"
+        params = {
+            'symbol': 'TOMO3LUSDT',
+            'interval': '1d',
+        }
+        request_builder = APIRequestManager(url, params)
+        status_code, data = request_builder.make_request()
+
+        if status_code == 200:
+            return render(self.request, 'main/kline.html', {'klines': data})
 
         return render(self.request, 'main/not_available.html')
 
@@ -48,34 +47,44 @@ class Klines(View):
 class Order(View):
     def get(self, *args, **kwargs):
         url = "https://api.mexc.com/api/v3/order/test?"
-        api_key = f"api_key={env('API_KEY')}&"
-        url_data = "symbol={}&side=BUY&type=LIMIT&quantity=1&price={}&recvWindow=5000&timestamp={}".format(
-            kwargs['symbol'], kwargs['price'], int(time.time() * 1000),
-        )
-        secret = env('API_SECRET').encode('utf-8')
-        total_params = (api_key+url_data).encode('utf-8')
-        signature = hmac.new(secret, total_params, hashlib.sha256).hexdigest()
+        params = {
+            'symbol': kwargs['symbol'],
+            'side': 'BUY',
+            'type': 'LIMIT',
+            'quantity': 1,
+            'price': kwargs['price'],
+            'recvWindow': 5000,
+        }
+        request_builder = APIRequestManager(url, params, method='post', signature=True)
+        status_code, data = request_builder.make_request()
 
-        final_url = url + api_key + url_data + f"&signature={signature}"
-        response = requests.post(final_url)
-        data = response.json()
+        if status_code == 200:
+            return render(self.request, 'main/successful.html', {'data': data})
 
-        return render(self.request, 'main/successful.html', {'data': data, 'url': final_url})
+        return render(self.request, 'main/not_available.html')
 
 
 class Account(View):
     def get(self, *args, **kwargs):
         url = "https://api.mexc.com/api/v3/account?"
-        api_key = f"api_key={env('API_KEY')}&"
-        url_data = "timestamp={}".format(
-            int(time.time() * 1000),
-        )
-        secret = env('API_SECRET').encode('utf-8')
-        total_params = (api_key+url_data).encode('utf-8')
-        signature = hmac.new(secret, total_params, hashlib.sha256).hexdigest()
+        params = {}
+        request_builder = APIRequestManager(url, params, method='get', signature=True)
+        status_code, data = request_builder.make_request()
 
-        final_url = url + api_key + url_data + f"&signature={signature}"
-        response = requests.get(final_url)
-        data = response.json()
+        if status_code == 200:
+            return render(self.request, 'main/successful.html', {'data': data})
 
-        return render(self.request, 'main/successful.html', {'data': data, 'url': final_url})
+        return render(self.request, 'main/not_available.html')
+
+
+class Wallet(View):
+    def get(self, *args, **kwargs):
+        url = "https://api.mexc.com/api/v3/capital/config/getall?"
+        params = {}
+        request_builder = APIRequestManager(url, params, method='get', signature=True)
+        status_code, data = request_builder.make_request()
+
+        if status_code == 200:
+            return render(self.request, 'main/successful.html', {'data': data})
+
+        return render(self.request, 'main/not_available.html')
